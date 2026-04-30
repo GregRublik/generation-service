@@ -7,14 +7,14 @@ class PromptResponse(BasePrompt):
     name: str
     text: str
 
-    fields: dict
+    fields: list[str]
 
 
 class CreatePrompt(BaseModel):
     name: str
     text: str
 
-    fields: dict
+    fields: list[str]
 
 class ChangePrompt(CreatePrompt):
     pass
