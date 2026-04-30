@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 
-from src.api.v1.endpoints import prompts
+from api.v1.endpoints import prompts
 from config import settings
 
 app = FastAPI()
