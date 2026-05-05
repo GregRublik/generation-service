@@ -53,7 +53,7 @@ async def delete_prompt(
     await prompt_service.delete_prompt(prompt_id)
 
 
-@router.post("/build-prompt/{prompt_id}", response_model=BuildPromptResponse)
+@router.post("/build/{prompt_id}", response_model=BuildPromptResponse)
 async def build_prompt(
     prompt_id: int,
     prompt_data: BuildPrompt,
