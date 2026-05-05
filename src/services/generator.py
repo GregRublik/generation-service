@@ -1,6 +1,9 @@
-from services import prompt, unit_of_work, assistant
+from typing import Callable
 
-from schemas.generator import PayloadGenerate
+from services import prompt, unit_of_work
+from llm.client import LLMClient
+
+from schemas.responses import GenerateRequest
 from schemas.prompt import BuildPrompt
 
 class GeneratorService:
@@ -9,21 +12,49 @@ class GeneratorService:
             self,
             prompt_service: prompt.PromptService,
             uow: unit_of_work.UnitOfWork,
-            assistant_service: assistant.AssistantService
+            llm_client: LLMClient
     ):
         self.prompt_service = prompt_service
-        self.assistant_service = assistant_service
+        self.llm_client = llm_client
         self.uow = uow
 
-    async def generate(self, data: PayloadGenerate):
-        build_prompt_data = BuildPrompt(
-            fields={
-                "query": data.query,
-                "contexts": data.contexts,
-            }
-        )
+        self.mapping_methods = {
+            "chat": self._chat,
+            "generate": self._generate,
+            "structured": self._structured,
+            "summarize": self._summarize,
+        }
 
-        ready_prompt = await self.prompt_service.build_prompt(data.prompt_id, prompt_data=build_prompt_data)
+    async def _generate(self, data):
+        await self.llm_client.complete()
 
-        response = await self.assistant_service.
+
+    async def _chat(self, data):
+        pass
+
+    async def _structured(self, data):
+        pass
+    async def _summarize(self, data):
+        pass
+
+    async def run(self, data: GenerateRequest):
+        handler: Callable = self.mapping_methods.get(data.mode)
+
+        if not handler:
+            raise ValueError(f"Unknown mode: {data.mode}")
+
+        return await handler(data)
+
+
+
+    # async def generate(self, data: PayloadGenerate):
+    #     build_prompt_data = BuildPrompt(
+    #         fields=data.fields
+    #     )
+    #
+    #     system_prompt = await self.prompt_service.build_prompt(data.prompt_id, prompt_data=build_prompt_data)
+    #
+    #     response = await self.assistant_service.generate(ready_prompt.prompt)
+    #
+    #     return response
 

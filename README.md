@@ -1,4 +1,4 @@
-# INGESTION-SERVICE 
+# GENERATION-SERVICE 
 - Сервис для работы с документами, их загрузка и хранение в S3, а также сохранение metadata документов
 
 ```mermaid
