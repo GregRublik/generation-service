@@ -1,7 +1,8 @@
 from repositories.prompt import PromptRepository
 from services.unit_of_work import UnitOfWork
+from jinja2 import Template
 
-from schemas.prompt import CreatePrompt, ChangePrompt
+from schemas.prompt import CreatePrompt, ChangePrompt, BuildPrompt, BuildPromptResponse
 
 
 class PromptService:
@@ -31,3 +32,15 @@ class PromptService:
     async def delete_prompt(self, prompt_id: int):
         async with self.uow:
             return await self.prompt_repository.delete_by_id(self.uow.session, prompt_id)
+
+    async def build_prompt(self, prompt_id: int, prompt_data: BuildPrompt) -> BuildPromptResponse:
+        async with self.uow:
+            prompt = await self.prompt_repository.get_by_id(self.uow.session, prompt_id)
+            template = Template(prompt.text)
+
+            rendered_text = template.render(**prompt_data.fields)
+
+            return BuildPromptResponse(
+                prompt=rendered_text
+            )
+

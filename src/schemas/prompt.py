@@ -18,3 +18,10 @@ class CreatePrompt(BaseModel):
 
 class ChangePrompt(CreatePrompt):
     pass
+
+class BuildPrompt(BaseModel):
+
+    fields: dict[str, str]
+
+class BuildPromptResponse(BaseModel):
+    prompt: str
