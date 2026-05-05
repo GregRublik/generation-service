@@ -7,6 +7,8 @@ from services.generator import GeneratorService
 from services.prompt import PromptService
 from services.unit_of_work import UnitOfWork
 
+from llm.client import LLMClientFactory
+
 from db.database import get_db_session
 
 # REPO
@@ -35,7 +37,17 @@ def get_generator_service(
     prompt_service: PromptService = Depends(get_prompt_service),
     uow: UnitOfWork = Depends(get_uow_service),
 ) -> GeneratorService:
+
+    factory = LLMClientFactory(
+        ""
+    )
+    client = factory.create(
+        "provider",
+        "base_url"
+    )
+
     return GeneratorService(
         prompt_service,
-        uow
+        uow,
+        llm_client=client
     )

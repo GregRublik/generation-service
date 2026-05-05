@@ -8,6 +8,7 @@ class Mode(StrEnum):
     summarize = "summarize"
 
 class GenerateRequest(BaseModel):
+    query: str
     prompt_id: int
     fields: dict[str, str]
 
