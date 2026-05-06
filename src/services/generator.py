@@ -39,7 +39,7 @@ class GeneratorService:
         system_prompt = await self._build_prompt(data)
         if data.stream:
 
-            return self.llm_client.stream(
+            return await self.llm_client.stream(
                 query=data.query,
                 system=system_prompt.prompt
             )
