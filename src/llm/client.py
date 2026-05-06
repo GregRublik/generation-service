@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-import httpx
+from aiohttp import ClientSession
 from typing import AsyncGenerator, Optional, Any
 
 class BaseLLMClient(ABC):
@@ -24,8 +24,8 @@ class BaseLLMClient(ABC):
 
 class OpenAICompatibleClient(BaseLLMClient):
 
-    def __init__(self, http_client: httpx.AsyncClient, base_url: str):
-        self.http_client = http_client
+    def __init__(self, http_session: ClientSession, base_url: str):
+        self.http_session = http_session
         self.base_url = base_url
 
     @staticmethod
@@ -59,13 +59,13 @@ class OpenAICompatibleClient(BaseLLMClient):
 
         payload["messages"] = [m for m in payload["messages"] if m]
 
-        resp = await self.http_client.post(
+        resp = await self.http_session.post(
             f"{self.base_url}/v1/chat/completions",
             json=payload
         )
         resp.raise_for_status()
 
-        data = resp.json()
+        data = await resp.json()
 
         return self._extract_text(data)
 
@@ -104,8 +104,8 @@ class OpenAICompatibleClient(BaseLLMClient):
 
 class SimpleCompletionClient(BaseLLMClient):
 
-    def __init__(self, http_client: httpx.AsyncClient, base_url: str):
-        self.http_client = http_client
+    def __init__(self, http_session: ClientSession, base_url: str):
+        self.http_session = http_session
         self.base_url = base_url
 
     async def complete(self, query, system=None, response_format=None):
@@ -119,13 +119,13 @@ class SimpleCompletionClient(BaseLLMClient):
             "n_predict": 256
         }
 
-        resp = await self.http_client.post(
+        resp = await self.http_session.post(
             f"{self.base_url}/completion",
             json=payload
         )
         resp.raise_for_status()
 
-        data = resp.json()
+        data = await resp.json()
 
         return data.get("content") or data.get("text")
 
@@ -135,11 +135,11 @@ class SimpleCompletionClient(BaseLLMClient):
 
 class LLMClientFactory:
 
-    def __init__(self, http_client: httpx.AsyncClient):
-        self.http_client = http_client
+    def __init__(self, http_session: ClientSession):
+        self.http_session = http_session
 
     def create(self, base_url: str):
         return SimpleCompletionClient(
-            http_client=self.http_client,
+            http_session=self.http_session,
             base_url=base_url
         )

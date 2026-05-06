@@ -1,5 +1,5 @@
 from fastapi import Depends
-from httpx import AsyncClient, Timeout
+from aiohttp import ClientSession
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.prompt import PromptRepository
@@ -12,7 +12,13 @@ from llm.client import LLMClientFactory
 
 from db.database import get_db_session
 
-from config import settings
+from config import settings, SessionManager
+
+
+def get_http_session(
+        http_session: ClientSession = Depends(SessionManager.get_session),
+) -> ClientSession:
+    return http_session
 
 # REPO
 def get_prompt_repository() -> PromptRepository:
@@ -39,16 +45,11 @@ def get_prompt_service(
 def get_generator_service(
     prompt_service: PromptService = Depends(get_prompt_service),
     uow: UnitOfWork = Depends(get_uow_service),
+    http_session: ClientSession = Depends(get_http_session),
 ) -> GeneratorService:
 
     factory = LLMClientFactory(
-        AsyncClient(
-            timeout=Timeout(
-            connect=5.0,
-            read=120.0,
-            write=10.0,
-            pool=5.0
-    ))
+        http_session
     )
     client = factory.create(
         settings.llm.dsn
