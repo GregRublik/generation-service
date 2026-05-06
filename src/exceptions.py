@@ -13,5 +13,5 @@ class DatabaseUnavailableException(Exception):
     status_code = 503
 
     def __init__(self, _original_error: Exception):
-        self.error = f"Database unavailable." # print(_original_error: Exception)
+        self.error = f"Database unavailable.{_original_error}" # print(_original_error: Exception)
         super().__init__(self.error)

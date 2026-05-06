@@ -12,7 +12,7 @@ router = APIRouter(tags=["prompts"], prefix="/prompts")
 async def get_prompts(
     prompt_service: PromptService = Depends(get_prompt_service),
 ):
-    """Получить промпт"""
+    """Получить промпты"""
     return await prompt_service.get_prompts()
 
 
