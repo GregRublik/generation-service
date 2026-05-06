@@ -28,7 +28,8 @@ class OpenAICompatibleClient(BaseLLMClient):
         self.http_client = http_client
         self.base_url = base_url
 
-    def _extract_text(self, data: dict) -> str:
+    @staticmethod
+    def _extract_text(data: dict) -> str:
         if "choices" in data:
             choice = data["choices"][0]
 
@@ -101,13 +102,44 @@ class OpenAICompatibleClient(BaseLLMClient):
                 yield line
 
 
+class SimpleCompletionClient(BaseLLMClient):
+
+    def __init__(self, http_client: httpx.AsyncClient, base_url: str):
+        self.http_client = http_client
+        self.base_url = base_url
+
+    async def complete(self, query, system=None, response_format=None):
+
+        prompt = query
+        if system:
+            prompt = f"{system}\n\n{query}"
+
+        payload = {
+            "prompt": prompt,
+            "n_predict": 256
+        }
+
+        resp = await self.http_client.post(
+            f"{self.base_url}/completion",
+            json=payload
+        )
+        resp.raise_for_status()
+
+        data = resp.json()
+
+        return data.get("content") or data.get("text")
+
+    async def stream(self, query, system=None):
+        raise NotImplementedError("Streaming not supported")
+
+
 class LLMClientFactory:
 
-    def __init__(self, http_client):
+    def __init__(self, http_client: httpx.AsyncClient):
         self.http_client = http_client
 
     def create(self, base_url: str):
-        return OpenAICompatibleClient(
+        return SimpleCompletionClient(
             http_client=self.http_client,
             base_url=base_url
         )
