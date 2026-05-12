@@ -35,12 +35,18 @@ class DBSettings(BaseSettings):
 class LLMSettings(BaseSettings):
     host: str
     port: int
+    api_key: str
+    model_name: str
 
     model_config = SettingsConfigDict(env_prefix="LLM_", env_file=".env", extra="ignore")
 
     @property
-    def dsn(self):
+    def dsn_http(self):
         return f"http://{self.host}:{self.port}"
+
+    @property
+    def dsn_https(self):
+        return f"https://{self.host}"
 
 
 class Settings(BaseSettings):

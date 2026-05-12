@@ -24,9 +24,11 @@ class BaseLLMClient(ABC):
 
 class OpenAICompatibleClient(BaseLLMClient):
 
-    def __init__(self, http_session: ClientSession, base_url: str):
+    def __init__(self, http_session: ClientSession, base_url: str, api_key: str, model_name: str):
         self.http_session = http_session
         self.base_url = base_url
+        self.api_key = api_key
+        self.model_name = model_name
 
     @staticmethod
     def _extract_text(data: dict) -> str:
@@ -47,6 +49,7 @@ class OpenAICompatibleClient(BaseLLMClient):
     async def complete(self, query, system=None, response_format=None):
 
         payload = {
+            "model": self.model_name,
             "messages": [
                 {"role": "system", "content": system} if system else None,
                 {"role": "user", "content": query},
@@ -61,7 +64,8 @@ class OpenAICompatibleClient(BaseLLMClient):
 
         resp = await self.http_session.post(
             f"{self.base_url}/v1/chat/completions",
-            json=payload
+            json=payload,
+            headers={"Authorization": f"Bearer {self.api_key}"}
         )
         resp.raise_for_status()
 
@@ -104,9 +108,10 @@ class OpenAICompatibleClient(BaseLLMClient):
 
 class SimpleCompletionClient(BaseLLMClient):
 
-    def __init__(self, http_session: ClientSession, base_url: str):
+    def __init__(self, http_session: ClientSession, base_url: str, api_key: str):
         self.http_session = http_session
         self.base_url = base_url
+        self.api_key = api_key
 
     async def complete(self, query, system=None, response_format=None):
 
@@ -116,7 +121,8 @@ class SimpleCompletionClient(BaseLLMClient):
 
         payload = {
             "prompt": prompt,
-            "n_predict": 256
+            "n_predict": 256,
+            "api_key": self.api_key,
         }
 
         resp = await self.http_session.post(
@@ -135,11 +141,21 @@ class SimpleCompletionClient(BaseLLMClient):
 
 class LLMClientFactory:
 
-    def __init__(self, http_session: ClientSession):
+    def __init__(self, http_session: ClientSession, api_key: str, model_name: str):
         self.http_session = http_session
+        self.api_key = api_key
+        self.model_name = model_name
 
     def create(self, base_url: str):
+        if True:
+            return OpenAICompatibleClient(
+                self.http_session,
+                base_url,
+                self.api_key,
+                self.model_name
+            )
         return SimpleCompletionClient(
             http_session=self.http_session,
-            base_url=base_url
+            base_url=base_url,
+            api_key=self.api_key
         )

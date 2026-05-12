@@ -12,6 +12,7 @@ class AssistantService:
         self,
         url_llm: str,
         model: str,
+        api_key: str | None = None,
         provider: str = "openai",
 
         temperature: float = 0.2,
@@ -20,6 +21,7 @@ class AssistantService:
         self.provider = provider
         self.model_name = model
         self.temperature = temperature
+        self.api_key = api_key
 
         self.llm: BaseChatModel = self._init_llm()
 
@@ -29,6 +31,7 @@ class AssistantService:
                 base_url=self.url_llm,
                 model=self.model_name,
                 temperature=self.temperature,
+                api_key=self.api_key
             )
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")

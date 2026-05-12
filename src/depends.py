@@ -49,10 +49,12 @@ def get_generator_service(
 ) -> GeneratorService:
 
     factory = LLMClientFactory(
-        http_session
+        http_session,
+        api_key=settings.llm.api_key,
+        model_name=settings.llm.model_name,
     )
     client = factory.create(
-        settings.llm.dsn
+        settings.llm.dsn_https
     )
 
     return GeneratorService(
