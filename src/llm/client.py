@@ -32,19 +32,22 @@ class OpenAICompatibleClient(BaseLLMClient):
 
     @staticmethod
     def _extract_text(data: dict) -> str:
-        if "choices" in data:
-            choice = data["choices"][0]
+        try:
+            if "choices" in data:
+                choice = data["choices"][0]
 
-            if "message" in choice:
-                return choice["message"]["content"]
+                if "message" in choice:
+                    return choice["message"]["content"]
 
-            if "text" in choice:
-                return choice["text"]
+                if "text" in choice:
+                    return choice["text"]
 
-        if "content" in data:
-            return data["content"]
+            if "content" in data:
+                return data["content"]
 
-        raise ValueError(f"Unknown response format: {data}")
+            raise ValueError(f"Unknown response format: {data}")
+        except TypeError:
+            raise ValueError(f"Unknown response format typeerror, data: {data}")
 
     async def complete(self, query, system=None, response_format=None):
 
