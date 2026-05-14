@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
@@ -5,7 +6,9 @@ from schemas.responses import GenerateRequest
 from services.generator import GeneratorService
 from depends import get_generator_service
 
-router = APIRouter(tags=["inference"], prefix="/responses")
+from schemas.response import ok
+
+router = APIRouter(prefix="/responses")
 
 
 @router.post("/generate")
@@ -13,7 +16,7 @@ async def generate(
     payload: GenerateRequest,
     generator_service: GeneratorService = Depends(get_generator_service),
 ):
-    """Классическая генерация"""
+    """Standard generation"""
 
     result = await generator_service.run(payload)
 
@@ -26,4 +29,4 @@ async def generate(
 
         return StreamingResponse(event_stream(), media_type="text/plain")
 
-    return result
+    return ok(result)
