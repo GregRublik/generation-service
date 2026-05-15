@@ -12,7 +12,7 @@ router = APIRouter()
 async def health():
     return ok(
         ResponseHealth(
-            service="orchestrator-service",
+            service="generation-service",
             timestamp=datetime.now()
         )
     )

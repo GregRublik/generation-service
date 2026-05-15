@@ -7,12 +7,13 @@ from services.generator import GeneratorService
 
 from services.prompt import PromptService
 from services.unit_of_work import UnitOfWork
+from utils.session_manager import SessionManager
 
 from llm.client import LLMClientFactory
 
 from db.database import get_db_session
 
-from config import settings, SessionManager
+from config import settings
 
 
 def get_http_session(
